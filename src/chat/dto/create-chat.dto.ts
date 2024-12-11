@@ -19,5 +19,5 @@ export class CreateChatDto {
     required: false,
   })
   @IsOptional()
-  readonly members!: number[];
+  readonly members?: number[];
 }

@@ -15,4 +15,13 @@ export class UsersController {
   async createNewUser(@Body() userData: UserCreateDto) {
     return await this.usersService.createUser(userData);
   }
+
+  // @Patch('join')
+  // async joinToChat(@Body() body: JoinToChatDto) {
+  //   try {
+  //     const test = this.usersService.joinToChat(body.chatId, body.userId);
+  //   } catch {
+  //     console.error('fvdjn');
+  //   }
+  // }
 }

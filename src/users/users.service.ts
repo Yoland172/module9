@@ -24,17 +24,21 @@ export class UsersService {
     }
   }
 
-  async addUserToChat(chatId: number, usersId: number[]) {
-    for await (const el of usersId) {
-      const currentUser = await this.usersReposetory.findOne({
-        select: ['chats'],
-        where: { id: el },
-      });
-
-      const updatedChats = Array.from(new Set([...currentUser.chats, chatId]));
-      console.log(
-        await this.usersReposetory.update({ id: el }, { chats: updatedChats }),
-      );
-    }
+  async findUserById(userId: number) {
+    return await this.usersReposetory.findOneBy({ id: userId });
   }
+
+  // async addUserToChat(chatId: number, usersId: number[]) {
+  //   for await (const el of usersId) {
+  //     const currentUser = await this.usersReposetory.findOne({
+  //       select: ['chats'],
+  //       where: { id: el },
+  //     });
+
+  //     const updatedChats = Array.from(new Set([...currentUser.chats, chatId]));
+  //     console.log(
+  //       await this.usersReposetory.update({ id: el }, { chats: updatedChats }),
+  //     );
+  //   }
+  // }
 }

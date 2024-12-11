@@ -1,5 +1,12 @@
 import { Chat } from 'src/chat/entities/chat.entity';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany } from 'typeorm';
+import { Message } from 'src/messages/entities/message.entity';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToMany,
+  OneToMany,
+} from 'typeorm';
 
 @Entity()
 export class User {
@@ -15,7 +22,9 @@ export class User {
   @Column({ default: true })
   isActive: boolean;
 
-  @Column({ type: 'simple-array' })
-  @ManyToMany(() => Chat, (chats) => chats.id)
-  chats: number[];
+  @ManyToMany(() => Chat, (chat) => chat.members)
+  chats: Chat[];
+
+  @OneToMany(() => Message, (message) => message.user)
+  messages: Message[];
 }

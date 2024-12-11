@@ -1,4 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -16,28 +21,49 @@ export class ChatService {
 
   async createChat(chatData: CreateChatDto) {
     const newChat = this.chatReposetory.create({
-      ...chatData,
-      members: chatData.members || [],
+      name: chatData.name,
     });
     return await this.chatReposetory.save(newChat);
   }
 
   async addNewMembers(members: number[], chatId: number) {
-    console.log(members, chatId);
     const currentChat = await this.chatReposetory.findOne({
-      select: ['members'],
+      relations: ['members'],
       where: { id: chatId },
     });
-    const updatedMembers = [...new Set([...currentChat.members, ...members])];
-    console.log(updatedMembers);
-    console.log(
-      await this.chatReposetory.update(
-        { id: chatId },
-        { members: updatedMembers },
-      ),
-    );
 
-    await this.usersService.addUserToChat(chatId, members);
+    members.forEach(async (el) => {
+      const user = await this.usersService.findUserById(el);
+      if (!user) {
+        throw new NotFoundException(`User with id ${el} not found`);
+      }
+      currentChat.members.push(user);
+    });
+
+    await this.chatReposetory.save(currentChat);
+  }
+
+  async deleteUserFromChat(chatId: number, userId: number) {
+    const currentChat = await this.chatReposetory.findOne({
+      where: { id: chatId },
+      relations: ['members'],
+    });
+    const userIndex = currentChat.members.findIndex((el) => el.id === userId);
+    if (userIndex === -1) {
+      throw new HttpException(
+        `User with id ${userId} not found`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    currentChat.members.splice(userIndex, 1);
+
+    return await this.chatReposetory.save(currentChat);
+
+    //currentChat.members
+  }
+
+  async findChatById(chatId: number) {
+    return await this.chatReposetory.findOneBy({ id: chatId });
   }
 
   findAll() {
